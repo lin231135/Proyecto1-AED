@@ -2,6 +2,10 @@ package uvg.edu.gt;
 
 import java.util.HashMap;
 
+/**
+ * Clase que representa el intérprete para ejecutar código Lisp.
+ */
+
 public class Interprete {
 
     private Lexer codigo;
