@@ -1,6 +1,8 @@
 package uvg.edu.gt;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Clase que representa el intérprete para ejecutar código Lisp.
@@ -69,13 +71,69 @@ public class Interprete {
         return stack;
     }
 
+    /**
+     * Método para procesar el código Lisp y convertirlo en una estructura de datos.
+     * @param codigo Lista de instrucciones del programa.
+     * @return Estructura de datos representando el código Lisp procesado.
+     */
     private Object procesarProcesarCodigo(Stack<Object> codigo) {
+        // Verificar si el código está vacío
+        if (codigo.empty()) {
+            throw new IllegalArgumentException("Unexpected EOF while reading");
+        }
+        // Obtener el primer elemento del código
+        Object sec = codigo.getVector().remove(0);
+
+        // Si el primer elemento es '(', procesar una lista de instrucciones
+        if (sec.equals("(")) {
+            Stack<Object> inst = new Stack<>(codigo.size() - 1);
+
+            // Iterar hasta encontrar el paréntesis de cierre ')'
+            while (!codigo.getVector().get(0).equals(")")) {
+                // Procesar recursivamente cada elemento del código
+                inst.push(procesarProcesarCodigo(codigo));
+            }
+            // Eliminar el paréntesis de cierre
+            codigo.getVector().remove(0);
+            return inst;
+        } else {
+            // Si no es una lista, retornar el valor del elemento
+            return parsearString((String) sec);
+        }
     }
 
+    /**
+     * Método para procesar las instrucciones del código Lisp.
+     * @param pr Estructura de datos que representa las instrucciones del programa.
+     */
     private void procesarInstrucciones(Object pr) {
+        if (pr instanceof Stack) {
+            Stack codigo = (Stack) pr;
+            for (int i = 0; i < codigo.size(); i++) {
+                leerInstruccion(codigo.getVector().elementAt(i));
+            }
+
+        } else if (pr instanceof String) {
+            leerInstruccion(pr);
+        }
     }
 
+     /**
+     * Método para obtener el valor de una variable.
+     * @param variable Nombre de la variable.
+     * @return Valor de la variable.
+     */
     public Object getVariable(String variable) {
+        // Verifica si la variable está en el mapa de variables
+        if (variables.containsKey(variable)) {
+            // Obtiene el valor de la variable del mapa
+            Object valorVariable = variables.get(variable);
+            // Retorna el valor de la variable
+            return valorVariable;
+        } else {
+            // Si la variable no está definida, retorna un valor predeterminado (en este caso, 0)
+            return 0;
+        }
     }
 
     private void imprimirStackVector(Object pr) {
@@ -103,7 +161,113 @@ public class Interprete {
     private Stack setearParametros(Stack parametros, Stack ingresados, Object funcionNueva) {
     }
 
+    /**
+     * Método para interpretar una instrucción del código Lisp.
+     * @param intruccion Instrucción a interpretar.
+     * @return Resultado de la instrucción.
+     */
     public Object leerInstruccion(Object intruccion) {
+        if (intruccion instanceof Stack) {
+            Stack codigo = (Stack) intruccion;
+            if (codigo.size() > 0) {
+                Object sec = (codigo.getVector().firstElement());
+                if (sec instanceof String) {
+                    procesarInstrucciones(codigo);
+                    switch (((String) sec).toUpperCase()) {
+                        
+                        case "+":
+                            Object valor1 = leerInstruccion(codigo.getVector().elementAt(1));
+                            Object valor2 = leerInstruccion(codigo.getVector().elementAt(2));
+                            // Verificar si alguno de los argumentos es una variable
+                            if (valor1 instanceof String) {
+                                valor1 = getVariable((String) valor1);
+                            }
+                            if (valor2 instanceof String) {
+                                valor2 = getVariable((String) valor2);
+                            }
+                            if (valor1 instanceof Integer && valor2 instanceof Integer) {
+                                return (Integer) valor1 + (Integer) valor2;
+                            } else {
+                                throw new IllegalArgumentException("Operación inválida: " + valor1 + " + " + valor2);
+                            }
+        
+                        case "-":
+                            Object valor3 = leerInstruccion(codigo.getVector().elementAt(1));
+                            Object valor4 = leerInstruccion(codigo.getVector().elementAt(2));
+                            // Verificar si alguno de los argumentos es una variable
+                            if (valor3 instanceof String) {
+                                valor3 = getVariable((String) valor3);
+                            }
+                            if (valor4 instanceof String) {
+                                valor4 = getVariable((String) valor4);
+                            }
+                            if (valor3 instanceof Integer && valor4 instanceof Integer) {
+                                return (Integer) valor3 - (Integer) valor4;
+                            } else {
+                                throw new IllegalArgumentException("Operación inválida: " + valor3 + " + " + valor4);
+                            }
+                        case "*":
+                            Object valor5 = leerInstruccion(codigo.getVector().elementAt(1));
+                            Object valor6 = leerInstruccion(codigo.getVector().elementAt(2));
+                            // Verificar si alguno de los argumentos es una variable
+                            if (valor5 instanceof String) {
+                                valor5 = getVariable((String) valor5);
+                            }
+                            if (valor6 instanceof String) {
+                                valor6 = getVariable((String) valor6);
+                            }
+                            if (valor5 instanceof Integer && valor6 instanceof Integer) {
+                                return (Integer) valor5 * (Integer) valor6;
+                            } else {
+                                throw new IllegalArgumentException("Operación inválida: " + valor5 + " * " + valor6);
+                            }
+    
+                        case "/":
+                            Object valor7 = leerInstruccion(codigo.getVector().elementAt(1));
+                            Object valor8 = leerInstruccion(codigo.getVector().elementAt(2));
+                            // Verificar si alguno de los argumentos es una variable
+                            if (valor7 instanceof String) {
+                                valor7 = getVariable((String) valor7);
+                            }
+                            if (valor8 instanceof String) {
+                                valor8 = getVariable((String) valor8);
+                            }
+                            if (valor7 instanceof Integer && valor8 instanceof Integer) {
+                                return (Integer) valor7 / (Integer) valor8;
+                            } else {
+                                throw new IllegalArgumentException("Operación inválida: " + valor7 + " / " + valor8);
+                            }
+  
+                        case "'":
+                            
+                        case "QUOTE":
+
+                        case "SETQ":
+                        
+                        case "DEFUN":
+                            
+                        case "ATOM":
+    
+                        case "EQUAL":
+
+                        case "=":
+                        case "EQ":
+    
+                        case "<":
+    
+                        case ">":
+                            
+                        case "COND":
+    
+                        case "PRINT":
+
+                        default:
+                            break;
+                    }
+                }
+            }
+        } 
+        return intruccion;
     }
 
     public Object getResultado() {
