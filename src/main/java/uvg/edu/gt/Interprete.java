@@ -136,13 +136,86 @@ public class Interprete {
         }
     }
 
+         /**
+     * Método para obtener el valor de una variable.
+     * @param variable Nombre de la variable.
+     * @return Valor de la variable.
+     */
+    public Object getVariable(String variable) {
+        // Verifica si la variable está en el mapa de variables
+        if (variables.containsKey(variable)) {
+            // Obtiene el valor de la variable del mapa
+            Object valorVariable = variables.get(variable);
+            // Retorna el valor de la variable
+            return valorVariable;
+        } else {
+            // Si la variable no está definida, retorna un valor predeterminado (en este caso, 0)
+            return 0;
+        }
+    }
+
+    /**
+     * Método para imprimir una estructura StackVector.
+     * @param pr Estructura StackVector a imprimir.
+     */
     private void imprimirStackVector(Object pr) {
+
+        if (pr instanceof Stack) {
+            Stack programa = (Stack) pr;
+            for (int i = 0; i < programa.size(); i++) {
+                if (programa.getVector().elementAt(i) instanceof Stack) {
+                    imprimirStackVector(programa.getVector().elementAt(i));
+                } else {
+                    System.out.print(programa.getVector().elementAt(i) + " ");
+                }
+            }
+        } else {
+            System.out.print("Problema");
+        }
+
     }
 
+    /**
+    * Método para convertir una cadena de caracteres en un tipo de dato de Java
+    * correspondiente (entero o flotante).
+    * @param dato Cadena de caracteres a parsear.
+    * @return Objeto con el tipo de dato correspondiente.
+    */
     private Object parsearString(String dato) {
+        try {
+            // Intenta parsear la cadena como un entero
+            return Integer.parseInt(dato);
+        } catch (NumberFormatException exc) {
+            try {
+                // Si falla, intenta parsear la cadena como un flotante
+                return Float.parseFloat(dato);
+            } catch (NumberFormatException exc2) {
+                // Si falla nuevamente, retorna la cadena original
+                return dato;
+            }
+        }
     }
 
+    /**
+     * Método para ejecutar una función Lisp.
+     * @param fun Función a ejecutar.
+     * @return Resultado de la ejecución de la función.
+     */
     private Object ejecutarFuncion(Object fun) {
+        Stack funNuevo = new Stack();
+        if (fun instanceof Stack) {
+            Stack programa = (Stack) fun;
+            for (int i = 0; i < programa.size(); i++) {
+                if (programa.getVector().elementAt(i) instanceof Stack) {
+                    ejecutarFuncion(programa.getVector().elementAt(i));
+                } else {
+                    funNuevo.push(programa.getVector().elementAt(i));
+                }
+            }
+        } else {
+            System.out.print("Problema");
+        }
+        return leerInstruccion(funNuevo);
     }
 
     private Boolean Atom(Object algo) {
