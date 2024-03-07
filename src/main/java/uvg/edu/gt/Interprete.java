@@ -118,25 +118,7 @@ public class Interprete {
         }
     }
 
-     /**
-     * Método para obtener el valor de una variable.
-     * @param variable Nombre de la variable.
-     * @return Valor de la variable.
-     */
-    public Object getVariable(String variable) {
-        // Verifica si la variable está en el mapa de variables
-        if (variables.containsKey(variable)) {
-            // Obtiene el valor de la variable del mapa
-            Object valorVariable = variables.get(variable);
-            // Retorna el valor de la variable
-            return valorVariable;
-        } else {
-            // Si la variable no está definida, retorna un valor predeterminado (en este caso, 0)
-            return 0;
-        }
-    }
-
-         /**
+    /**
      * Método para obtener el valor de una variable.
      * @param variable Nombre de la variable.
      * @return Valor de la variable.
@@ -219,19 +201,96 @@ public class Interprete {
     }
 
     private Boolean Atom(Object algo) {
+        if (algo instanceof String) {
+            return true;
+        } else if (algo instanceof Integer) {
+            return true;
+        } else {
+            return false;
+        }
     }
+
+    /**
+     * Método para traducir un valor booleano a su representación en Lisp.
+     * @param valor Valor booleano a traducir.
+     * @return Representación en Lisp del valor booleano.
+     */
 
     private String traducirBooleano(boolean valor) {
+        return valor ? "T" : "NIL";
     }
 
+    /**
+     * Método para comparar si dos objetos son iguales en Lisp.
+     * @param e1 Primer objeto a comparar.
+     * @param e2 Segundo objeto a comparar.
+     * @return Valor booleano que indica si los objetos son iguales.
+     */
     private Boolean equal(Object e1, Object e2) {
+        if (e1.equals(e2)) {
+            return true;
+        } else {
+            return false;
+        }
     }
 
+    /**
+     * Método para comparar dos números en Lisp.
+     * @param comp Operador de comparación (< o >).
+     * @param e1 Primer número.
+     * @param e2 Segundo número.
+     * @return Valor booleano que indica el resultado de la comparación.
+     */
 
     private Boolean compare(String comp, Integer e1, Integer e2) {
+        if (comp.equals("<")) {
+            return e1 < e2;
+        } else if (comp.equals(">")){
+            return e1 > e2;
+        }
+
+        return false;
     }
 
+    /**
+     * Método para reemplazar los parámetros de una función por sus valores correspondientes.
+     * @param parametros Parámetros de la función.
+     * @param ingresados Valores ingresados para los parámetros.
+     * @param funcionNueva Cuerpo de la función con los parámetros reemplazados.
+     * @return Cuerpo de la función con los parámetros reemplazados.
+     */
     private Stack setearParametros(Stack parametros, Stack ingresados, Object funcionNueva) {
+        Stack resultado = null;
+
+        if (funcionNueva instanceof Stack) {
+            Stack funcionOperable = (Stack) funcionNueva;
+            for (int i = 0; i < funcionOperable.size(); i++) {
+                if (funcionOperable.getVector().elementAt(i) instanceof Stack) {
+                    setearParametros(parametros, ingresados, funcionOperable.getVector().elementAt(i));
+                } else {
+
+                    for (int j = 0; j < parametros.size(); j++) {
+                        String parametro = (String) parametros.getVector().elementAt(j);
+                        Object ingresado = ingresados.getVector().elementAt(j);
+
+                        if (funcionOperable.getVector().elementAt(i) instanceof Stack) {
+                            setearParametros(parametros, ingresados, (Stack) funcionOperable.getVector().elementAt(i));
+                        } else {
+                            if (funcionOperable.getVector().elementAt(i).equals(parametro)) {
+                                funcionOperable.getVector().set(i, ingresado);
+                            } else {
+                                funcionOperable.getVector().set(i, funcionOperable.getVector().elementAt(i));
+                            }
+                        }
+                    }
+                }
+            }
+
+            resultado = funcionOperable;
+        } else {
+            System.out.print("Problema");
+        }
+        return resultado;
     }
 
     /**
