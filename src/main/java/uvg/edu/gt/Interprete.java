@@ -371,16 +371,83 @@ public class Interprete {
                             }
   
                         case "'":
-                            
+                            StringBuilder resultadoQuote = new StringBuilder();
+                            Stack<Object> listaQuote = (Stack<Object>) codigo.getVector().elementAt(1);
+                            for (Object elemento : listaQuote.getVector()) {
+                                if (elemento instanceof Stack) {
+                                    // Si el elemento es otro vector, lo tratamos como una lista y lo agregamos directamente
+                                    StringBuilder sublista = new StringBuilder();
+                                    for (Object subelemento : ((Stack<Object>) elemento).getVector()) {
+                                        sublista.append(subelemento).append(" ");
+                                    }
+                                    resultadoQuote.append(sublista.toString());
+                                } else {
+                                    // Si el elemento es un objeto individual, lo agregamos tal como está
+                                    resultadoQuote.append(elemento).append(" ");
+                                }
+                            }
+                            return resultadoQuote.toString();
+
                         case "QUOTE":
+                            StringBuilder resultadoQuote2 = new StringBuilder();
+                            Stack<Object> listaQuote2 = (Stack<Object>) codigo.getVector().elementAt(1);
+                            for (Object elemento : listaQuote2.getVector()) {
+                                resultadoQuote2.append(elemento).append(" ");
+                            }
+                            return resultadoQuote2.toString();
 
                         case "SETQ":
+                            if (codigo.size() == 3) { // Verifica que haya dos argumentos después de SETQ
+                                String variable = (String) codigo.getVector().elementAt(1);
+                                Object valor = leerInstruccion(codigo.getVector().elementAt(2));
+                                // Intenta convertir el valor a un entero si es posible
+                                if (valor instanceof String) {
+                                    try {
+                                        valor = Integer.parseInt((String) valor);
+                                    } catch (NumberFormatException e) {
+                                        // Si no se puede convertir a entero, se mantiene como String
+                                    }
+                                }
+                                // Almacena la variable y su valor en algún lugar, por ejemplo, un HashMap
+                                variables.put(variable, valor);
+                                // Retorna el valor asignado para que se pueda utilizar en el programa
+                                return valor;
+                            } else {
+                                System.out.println("Error: SETQ requiere exactamente dos argumentos");
+                                return null; // O algún otro valor que indique un error
+                            }
                         
                         case "DEFUN":
-                            
+                            if (codigo.size() >= 4) { // Verifica que la definición de la función esté completa
+                                String nombreFuncion = (String) codigo.getVector().elementAt(1);
+                                Stack<Object> parametrosFuncion = (Stack<Object>) codigo.getVector().elementAt(2);
+                                Stack<Object> cuerpoFuncion = (Stack<Object>) codigo.getVector().elementAt(3);
+                                // Guarda la función en un mapa para su posterior uso
+                                this.funciones.put(nombreFuncion, codigo);
+                                // Imprime un mensaje indicando que la función ha sido definida
+                                System.out.println("Función " + nombreFuncion + " definida correctamente.");
+                            } else {
+                                System.out.println("Error: DEFUN requiere al menos tres argumentos");
+                            }
+                            break;
+
                         case "ATOM":
+                        Object algo = leerInstruccion(codigo.getVector().elementAt(1));
+                        return traducirBooleano(Atom(algo));
+    
+                        case "LIST":
+                            List miLista = new ArrayList();
+                            StringBuilder miListaString = new StringBuilder();
+                            for (int i = 1; i < codigo.size(); i++) {
+                                miLista.add(leerInstruccion(codigo.getVector().elementAt(i)));
+                                miListaString.append(leerInstruccion(codigo.getVector().elementAt(i))).append(" ");
+                            }
+                            return miLista;
     
                         case "EQUAL":
+                            List lst1 = (List) leerInstruccion(codigo.getVector().elementAt(1));
+                            List lst2 = (List) leerInstruccion(codigo.getVector().elementAt(2));
+                            return traducirBooleano(equal(lst1, lst2));
 
                         case "=":
                         case "EQ":
@@ -403,5 +470,7 @@ public class Interprete {
     }
 
     public Object getResultado() {
+        // Retorna el resultado de la interpretación del programa
+        return leerInstruccion(codigo);
     }
 }
