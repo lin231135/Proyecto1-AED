@@ -451,14 +451,31 @@ public class Interprete {
 
                         case "=":
                         case "EQ":
+                            Object e1 = leerInstruccion(codigo.getVector().elementAt(1));
+                            Object e2 = leerInstruccion(codigo.getVector().elementAt(2));
+                            return traducirBooleano(equal(e1, e2));
     
                         case "<":
+                            Integer e3 = (Integer) leerInstruccion(codigo.getVector().elementAt(1));
+                            Integer e4 = (Integer) leerInstruccion(codigo.getVector().elementAt(2));
+                            return traducirBooleano(compare("<", e3, e4));
     
                         case ">":
+                            Integer e5 = (Integer) leerInstruccion(codigo.getVector().elementAt(1));
+                            Integer e6 = (Integer) leerInstruccion(codigo.getVector().elementAt(2));
+                            return traducirBooleano(compare(">", e5, e6));
                             
                         case "COND":
+                            System.out.println("positivo");
+                            break;
     
                         case "PRINT":
+                            StringBuilder printString = new StringBuilder();
+                            for (int i = 1; i < codigo.size(); i++) {
+                                printString.append(leerInstruccion(codigo.getVector().elementAt(i))).append(" ");
+                            }
+                            System.out.println(printString);
+                            break;
 
                         default:
                             break;
