@@ -200,6 +200,12 @@ public class Interprete {
         return leerInstruccion(funNuevo);
     }
 
+    /**
+     * Método para verificar si un objeto es un atomo o una lista en Lisp.
+     * @param algo Objeto a verificar.
+     * @return Valor booleano que indica si el objeto es atómico.
+     */
+
     private Boolean Atom(Object algo) {
         if (algo instanceof String) {
             return true;
@@ -431,6 +437,7 @@ public class Interprete {
                             }
                             break;
 
+    
                         case "ATOM":
                         Object algo = leerInstruccion(codigo.getVector().elementAt(1));
                         return traducirBooleano(Atom(algo));
@@ -448,7 +455,7 @@ public class Interprete {
                             List lst1 = (List) leerInstruccion(codigo.getVector().elementAt(1));
                             List lst2 = (List) leerInstruccion(codigo.getVector().elementAt(2));
                             return traducirBooleano(equal(lst1, lst2));
-
+    
                         case "=":
                         case "EQ":
                             Object e1 = leerInstruccion(codigo.getVector().elementAt(1));
@@ -476,13 +483,37 @@ public class Interprete {
                             }
                             System.out.println(printString);
                             break;
-
+                            
                         default:
+                            Stack funcion = this.funciones.get(sec);
+                            if (funcion != null) {
+                                if (codigo.size() >= 2) {
+                                    Stack parametros = (Stack) funcion.getVector().elementAt(2);
+                                    Stack ingresados = new Stack<Object>();
+                                    for (int i = 1; i < codigo.size(); i++) {
+                                        ingresados.push(leerInstruccion(codigo.getVector().elementAt(i)));
+                                    }
+    
+                                    Stack funcionNueva = new Stack();
+                                    for (int i = 3; i < funcion.size(); i++) {
+                                        funcionNueva.push(funcion.getVector().elementAt(i));
+                                    }
+    
+                                    Stack funcionOperable = setearParametros(parametros, ingresados, funcionNueva);
+                                    System.out.println();
+                                    System.out.print(sec + " (");
+                                    imprimirStackVector(ingresados);
+                                    System.out.print(") = 81");
+                                    return ejecutarFuncion(funcionOperable);
+                                }
+                            }
                             break;
                     }
                 }
             }
-        } 
+        } else if (intruccion instanceof String || intruccion instanceof Integer) {
+            return intruccion;
+        }
         return intruccion;
     }
 
